@@ -1,10 +1,10 @@
 import random
 
 EMPTY_CASE=" "
-GRID_LEN=30
+GRID_LEN=6
 THON_CASE="T"
 THON_COUNT=6
-THON_LIFE=5
+THON_LIFE=2
 SHARK_CASE="S"
 SHARK_COUNT=0
 SHARK_LIFE=6
@@ -22,19 +22,19 @@ MOVE_CASE = {
 }
 
 class Thon:
-    def __init__(self, x, y):
+    def __init__(self, x, y, life):
         self.x = x
         self.y = y
-        self.life = THON_LIFE
+        self.life = life
 
     def __repr__(self):
       return THON_CASE
         
 class Shark:
-    def __init__(self, x, y):
+    def __init__(self, x, y, life):
         self.x = x
         self.y = y
-        self.life = SHARK_LIFE
+        self.life = life
 
     def __repr__(self):
       return SHARK_CASE
@@ -56,24 +56,28 @@ def add_random_thons(grid, thon_count):
         while grid[x][y] is not EMPTY_CASE:
             x = random.randint(0, len(grid)-1)
             y = random.randint(0, len(grid)-1)
-        grid[x][y] = Thon(x,y)
+        grid[x][y] = Thon(x,y,THON_LIFE)
         thons.append(grid[x][y])
     return thons
 
 def move_thon(grid, thon):
-    while True:
-        random_number = random.randint(0, 7)
-        new_x = thon.x + MOVE_CASE[random_number][0]
-        new_y = thon.y + MOVE_CASE[random_number][1]
-        if (new_x < 0 or new_x >= GRID_LEN or new_y < 0 or new_y >= GRID_LEN):
-            continue
-        elif grid[new_x][new_y] is not EMPTY_CASE:
-            continue
-        else:
-            break
-    # print("debug: " +  str(thon.x) + ", " + str(thon.y) + " -> " +  str(new_x) + ", " + str(new_y))
-    grid[thon.x][thon.y] = EMPTY_CASE 
-    grid[new_x][new_y] = Thon(new_x, new_y)
+    if thon.life == 0:
+        grid[thon.x][thon.y] = EMPTY_CASE 
+    else:
+        while True:
+            random_number = random.randint(0, 7)
+            new_x = thon.x + MOVE_CASE[random_number][0]
+            new_y = thon.y + MOVE_CASE[random_number][1]
+            if (new_x < 0 or new_x >= GRID_LEN or new_y < 0 or new_y >= GRID_LEN):
+                continue
+            elif grid[new_x][new_y] is not EMPTY_CASE:
+                continue
+            else:
+                break
+        # print("debug: " +  str(thon.x) + ", " + str(thon.y) + " -> " +  str(new_x) + ", " + str(new_y))
+        life = thon.life
+        grid[thon.x][thon.y] = EMPTY_CASE 
+        grid[new_x][new_y] = Thon(new_x, new_y, life - 1)
 
 def thons_list(grid):
     thons = []
@@ -91,7 +95,7 @@ def add_random_sharks(grid, shark_count):
         while grid[x][y] is not EMPTY_CASE:
             x = random.randint(0, len(grid)-1)
             y = random.randint(0, len(grid)-1)
-        grid[x][y] = Shark(x,y)
+        grid[x][y] = Shark(x,y,SHARK_LIFE)
         sharks.append(grid[x][y])
     return sharks
 
@@ -114,7 +118,7 @@ if __name__ == "__main__":
             move_thon(grid, thon)
         print_grid(grid)
         print('-'*GRID_LEN*2)
-        ## je regénère la liste de thons mis à jour
+        ## je regénère la liste des thons mis à jour pour ne pas rebloucer sur une liste non à jour.
         thons = thons_list(grid)
         ## J'ajoute 1 tour
         t = t + 1
